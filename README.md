@@ -1,1 +1,1 @@
-A starting point for React Redux Apps. Fork me, right?
+A game made using react and redux.
