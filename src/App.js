@@ -4,13 +4,20 @@ import { connect } from "react-redux";
 import GameBoard from "./components/GameBoard/index";
 
 class App extends Component {
-  render() {
+  componentDidMount() {
     const { initialized, dispatch } = this.props;
     if (!initialized)
       dispatch({
         type: "INIT_PLAYER",
-        payload: { xPos: window.innerWidth / 2, yPos: window.innerHeight / 2 }
+        payload: {
+          xMax: document.body.getBoundingClientRect().width,
+          yMin:
+            document.querySelector("#Floor").getBoundingClientRect().top -
+            document.querySelector("#Floor").getBoundingClientRect().height
+        }
       });
+  }
+  render() {
     return (
       <div id="App">
         <GameBoard />

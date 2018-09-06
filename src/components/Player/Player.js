@@ -24,7 +24,7 @@ class Player extends Component {
           top: yPos + "px"
         }}
       >
-        {"\u2022"}
+        x
       </div>
     );
   }

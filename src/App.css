@@ -1,8 +1,15 @@
 #GameBoard {
   position: relative;
-  height: 100vh;
+  height: 90vh;
+  /* border-bottom: 100px solid black; */
 }
 
 #Player:focus {
   outline: none;
+}
+
+#Floor {
+  position: relative;
+  background-color: black;
+  top: 87%;
 }

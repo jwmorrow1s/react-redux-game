@@ -4,14 +4,15 @@ const handleMovement = (dispatch, e) => {
   e.preventDefault();
   switch (e.key) {
     case "ArrowRight": {
-      dispatch({ type: "MOV_R" });
+      dispatch({ type: "MOV_R", payload: { secs: new Date().getSeconds() } });
       return;
     }
     case "ArrowLeft": {
-      dispatch({ type: "MOV_L" });
+      dispatch({ type: "MOV_L", payload: { secs: new Date().getSeconds() } });
       return;
     }
-    case "ArrowUp": {
+    case " ": {
+      //spacebar
       dispatch({ type: "MOV_U" });
       return;
     }
