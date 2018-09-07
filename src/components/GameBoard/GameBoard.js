@@ -6,17 +6,20 @@ import { gravity } from "./handleCollision";
 
 class GameBoard extends Component {
   render() {
-    const { dispatch } = this.props;
+    const { dispatch, moving } = this.props;
     return (
       <div
         id="GameBoard"
         onLoad={(() => {
-          setInterval(
-            () =>
-              gravity(dispatch, document.querySelector("#GameBoard").children),
-            1000 / 16
-          );
+          window.onload = () => {
+            setInterval(() => {
+              gravity(dispatch, document.querySelector("#GameBoard").children);
+              if (!moving) dispatch({ type: "DECEL" });
+              dispatch({ type: "MOV_SKID" });
+            }, 1000 / 16);
+          };
         })()}
+        onKeyUp={() => dispatch({ type: "KILL_MOVEMENT" })}
       >
         <Player />
         <Floor />
@@ -25,7 +28,11 @@ class GameBoard extends Component {
   }
 }
 
-// const mapStateToProps = state => {};
+const mapStateToProps = state => {
+  return {
+    moving: state.moving
+  };
+};
 // const mapDispatchToProps = dispatch => {};
 
-export default connect(/*mapStateToProps ,mapDispatchToProps*/)(GameBoard);
+export default connect(mapStateToProps /* ,mapDispatchToProps*/)(GameBoard);

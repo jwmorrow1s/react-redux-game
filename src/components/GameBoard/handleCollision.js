@@ -20,7 +20,7 @@ const detectCollision = (objectPositionDataArray, tolerance) => {
 export const gravity = (dispatch, htmlCollection) => {
   const isCollision = detectCollision(
     parseCoordinatesFromDomElements(htmlCollection),
-    5
+    2
   );
 
   if (!isCollision) {
