@@ -1,14 +1,18 @@
+const PLAYER_WIDTH = 20;
+const PLAYER_HEIGHT = 20;
+const MAX_SPD = 10;
+//TODO: set up upward velocity and replace jump with that
 const initialState = {
   initialized: false,
   falling: false,
-  acceleration: 0,
-  direction: null,
-  jmp: 60,
-  spd: 5,
-  button_pressed: null
+  xPos: PLAYER_WIDTH,
+  xMin: 4,
+  jmp: 40,
+  spd: 0,
+  lastXVector: null,
+  xMotion: false,
+  lastMovingVector: null
 };
-const PLAYER_WIDTH = 20;
-const ACCEL_LIMIT = 20;
 
 const initalReducer = (state = initialState, action) => {
   switch (action.type) {
@@ -16,109 +20,128 @@ const initalReducer = (state = initialState, action) => {
       const { xMax, yMin } = action.payload;
       return {
         ...state,
-        xPos: PLAYER_WIDTH,
-        yPos: yMin,
-        yMin: yMin,
-        xMin: 4,
+        yPos: yMin - PLAYER_HEIGHT,
+        yMin: yMin - PLAYER_HEIGHT,
         xMax: xMax - PLAYER_WIDTH,
-        initialized: true,
-        moving: false
+        initialized: true
       };
     }
-    case "PRESS_UP": {
-    }
-    case "PRESS_DOWN": {
-    }
-    case "PRESS_RIGHT": {
-    }
-    case "PRESS_LEFT": {
-    }
-    case "MOV_U": {
-      const { yPos, acceleration, jmp, direction, moving } = state;
-      if (state.falling) return state;
-      if (acceleration > 0 && moving)
-        return {
-          ...state,
-          yPos: yPos - jmp,
-          acceleration:
-            acceleration * 2 <= ACCEL_LIMIT
-              ? acceleration * 2
-              : acceleration + (ACCEL_LIMIT - acceleration)
-        };
+
+    case "MOVEMENT_UPDATE": {
+      const {
+        jmp,
+        spd,
+        xMin,
+        xMax,
+        yMin,
+        xPos,
+        yPos,
+        falling,
+        lastXVector,
+        xMotion,
+        lastMovingVector
+      } = state;
+      const { keysDown } = action.payload;
+
+      const xVector = keysDown["ArrowLeft"] ? -1 : 1;
+      const yVector = keysDown[" "] ? -1 : 1;
+      const runningJump = Math.pow(spd, 1.7) > jmp ? Math.pow(spd, 1.7) : jmp;
+      const incomingXVector =
+        Object.keys(keysDown).find(k => {
+          return (
+            (k === "ArrowLeft" || k === "ArrowRight") && keysDown[k] === true
+          );
+        }) || null;
+
+      const isMotion = lastXVector
+        ? lastXVector === incomingXVector
+          ? true
+          : false
+        : incomingXVector
+          ? true
+          : false;
+
       return {
         ...state,
-        yPos: yPos - jmp
+        xPos: !isMotion
+          ? xPos
+          : xVector < 0
+            ? xPos - spd >= xMin
+              ? xPos - spd
+              : xPos - (xPos - xMin)
+            : xPos + spd <= xMax
+              ? xPos + spd
+              : xPos + (xMax - xPos),
+        // jmp: -40,
+        yPos: falling
+          ? yPos
+          : yVector < 0
+            ? yPos - runningJump
+            : yPos + jmp <= yMin
+              ? yPos + jmp
+              : yPos + (yMin - yPos),
+        spd: incomingXVector
+          ? lastMovingVector
+            ? incomingXVector === lastMovingVector
+              ? spd + 1 <= MAX_SPD
+                ? spd + 1
+                : spd
+              : 0
+            : spd + 1 <= MAX_SPD
+              ? spd + 1
+              : spd
+          : spd,
+        lastXVector: incomingXVector || null,
+        xMotion: isMotion,
+        lastMovingVector: incomingXVector ? incomingXVector : lastMovingVector
       };
     }
-    case "MOV_D": {
-      const { yPos, yMin, spd, falling } = state;
-      return falling
-        ? {
-            ...state,
-            yPos: yPos - spd * 2 < yMin ? yPos + spd * 10 : yMin - yPos
-          }
-        : { ...state, yPos: yPos < yMin ? yPos + spd : yPos };
-    }
-    case "MOV_L": {
-      const { xPos, xMin, acceleration, spd } = state;
+
+    case "MOVEMENT_DECAY": {
+      const {
+        jmp,
+        spd,
+        falling,
+        xMotion,
+        xPos,
+        xMax,
+        lastXVector,
+        xMin,
+        lastMovingVector,
+        yPos,
+        yMin
+      } = state;
+
+      console.log("xMotion: ", xMotion);
       return {
         ...state,
-        xPos: xPos > xMin ? xPos - spd : xPos,
-        moving: true,
-        direction: "left",
-        acceleration:
-          acceleration <= ACCEL_LIMIT ? acceleration + 6 : acceleration
+
+        xPos: falling
+          ? lastMovingVector === "ArrowLeft"
+            ? xPos - Math.pow(spd, 1.25) >= xMin
+              ? xPos - Math.pow(spd, 1.25)
+              : xPos - (xPos - xMin)
+            : lastMovingVector === "ArrowRight"
+              ? xPos + Math.pow(spd, 1.25) <= xMax
+                ? xPos + Math.pow(spd, 1.25)
+                : xPos + (xMax - xPos)
+              : xPos
+          : lastMovingVector === "ArrowLeft"
+            ? xPos - spd >= xMin
+              ? xPos - spd
+              : xPos - (xPos - xMin)
+            : lastMovingVector === "ArrowRight"
+              ? xPos + spd <= xMax
+                ? xPos + spd
+                : xPos + (xMax - xPos)
+              : xPos,
+
+        yPos: falling ? (yPos * 1.008 <= yMin ? yPos * 1.008 : yMin) : yPos,
+        spd: xMotion ? spd : spd - 1 >= 0 ? spd - 1 : spd,
+        falling: yPos < yMin ? true : false
       };
     }
-    case "MOV_R": {
-      const { xPos, xMax, acceleration, spd } = state;
-      return {
-        ...state,
-        xPos: xPos < xMax ? xPos + spd : xPos,
-        moving: true,
-        direction: "right",
-        acceleration:
-          acceleration <= ACCEL_LIMIT ? acceleration + 6 : acceleration
-      };
-    }
-    case "MOV_FALL": {
-      const { yPos, yMin, spd } = state;
-      return {
-        ...state,
-        falling: true,
-        yPos: yPos + spd <= yMin ? yPos + spd * 1.75 : yMin
-      };
-    }
-    case "MOV_LAND": {
-      return { ...state, falling: false };
-    }
-    case "MOV_SKID": {
-      const { direction, acceleration, xMin, xMax, xPos } = state;
-      if (direction === "left")
-        return { ...state, xPos: xPos > xMin ? xPos - acceleration : xPos };
-      else if (direction === "right")
-        return { ...state, xPos: xPos < xMax ? xPos + acceleration : xPos };
-      else return state;
-    }
-    case "DECEL": {
-      const { acceleration } = state;
-      return {
-        ...state,
-        acceleration: acceleration - 1 >= 0 ? acceleration - 1 : acceleration
-      };
-    }
-    case "STOPPED": {
-      return { ...state, moving: false, direction: null };
-    }
-    case "KILL_MOVEMENT": {
-      const { acceleration } = state;
-      return {
-        ...state,
-        moving: false,
-        button_pressed: null,
-        acceleration: acceleration - 5 >= 0 ? acceleration - 5 : 0
-      };
-    }
+
     default: {
       console.log("Unhandled Action ", action);
       return state;

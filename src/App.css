@@ -1,11 +1,18 @@
 #GameBoard {
-  position: relative;
-  height: 90vh;
-  /* border-bottom: 100px solid black; */
 }
 
 #Player:focus {
   outline: none;
+}
+
+#GameBoard:focus {
+  position: relative;
+  outline: none;
+}
+
+.Level {
+  height: 90vh;
+  position: relative;
 }
 
 #Floor {

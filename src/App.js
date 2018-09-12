@@ -11,9 +11,7 @@ class App extends Component {
         type: "INIT_PLAYER",
         payload: {
           xMax: document.body.getBoundingClientRect().width,
-          yMin:
-            document.querySelector("#Floor").getBoundingClientRect().top -
-            document.querySelector("#Floor").getBoundingClientRect().height
+          yMin: document.querySelector("#Floor").getBoundingClientRect().top
         }
       });
   }
