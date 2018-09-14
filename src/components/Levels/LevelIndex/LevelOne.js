@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import Player from "../../Player/index";
 import Floor from "../../Floor/index";
+import Enemy from "../../Enemy/index";
 
 class LevelOne extends Component {
   constructor(props) {
@@ -18,6 +19,7 @@ class LevelOne extends Component {
     return (
       <div className="Level">
         <Player />
+        <Enemy />
       </div>
     );
   }

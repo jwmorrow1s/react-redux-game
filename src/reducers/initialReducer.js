@@ -13,7 +13,7 @@ const initialState = {
   xMin: 4,
   jmp: 40,
   spd: 0,
-  yMin: 857,
+  yMin: 0,
   lastXVector: null,
   xMotion: false,
   lastMovingVector: null
@@ -24,6 +24,11 @@ const initalReducer = (state = initialState, action) => {
     case "INIT_PLAYER": {
       const { xMax, yMin } = action.payload;
       const { playerWidth, playerHeight } = state;
+      console.log("yMin in enemyReducer: ", yMin);
+      console.log(
+        "In initialReducer: yMin - playerHeight: ",
+        yMin - playerHeight
+      );
       return {
         ...state,
         yPos: yMin - playerHeight,
@@ -159,6 +164,7 @@ const initalReducer = (state = initialState, action) => {
     }
 
     default: {
+      console.log("UNHANDLED PLAYER ACTION: ", action.type);
       return state;
     }
   }

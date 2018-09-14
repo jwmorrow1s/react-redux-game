@@ -84,10 +84,12 @@ class GameBoard extends Component {
 }
 
 const mapStateToProps = state => {
+  const { initialized } = state.initialReducer;
   return {
-    initialized: state.initialReducer
+    initialized: state.initialReducer.initialized,
+    falling: state.initialReducer.falling
   };
 };
 // const mapDispatchToProps = dispatch => {};
 
-export default connect(/*mapStateToProps ,mapDispatchToProps*/)(GameBoard);
+export default connect(mapStateToProps /* ,mapDispatchToProps*/)(GameBoard);
