@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import Player from "../Player/index";
 import Floor from "../Floor/index";
 
-class Level extends Component {
+class MakeCharacter extends Component {
   constructor(props) {
     super(props);
   }
@@ -16,7 +16,7 @@ class Level extends Component {
     const { dispatch } = this.props;
 
     return (
-      <div className="Level">
+      <div id="MakeCharacter">
         <Player />
         <Floor />
       </div>
@@ -31,4 +31,4 @@ const mapStateToProps = state => {
 };
 // const mapDispatchToProps = dispatch => {};
 
-export default connect(mapStateToProps /* ,mapDispatchToProps*/)(Level);
+export default connect(mapStateToProps /* ,mapDispatchToProps*/)(MakeCharacter);

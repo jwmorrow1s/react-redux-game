@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import Player from "../Player/index";
 import Floor from "../Floor/index";
-import Level from "../Level/index";
+import LevelOne from "../Levels/index";
 import { gravity, handleMovement, updateKeysDown } from "./handlers";
 
 class GameBoard extends Component {
@@ -21,7 +21,20 @@ class GameBoard extends Component {
     document.querySelector("#GameBoard").focus();
     document.querySelector("#GameBoard").onblur = () =>
       document.querySelector("#GameBoard").focus();
+    //Initialize Game, if not already
+    const { initialized, dispatch } = this.props;
+    if (!initialized) {
+      document.body.style.maxWidth = 800;
+      dispatch({
+        type: "INIT_PLAYER",
+        payload: {
+          xMax: document.body.getBoundingClientRect().width,
+          yMin: document.querySelector("#Floor").getBoundingClientRect().top
+        }
+      });
+    }
 
+    //Game Loop
     this.interval = setInterval(() => {
       const { keysDown } = this;
       const { dispatch, falling } = this.props;
@@ -58,18 +71,13 @@ class GameBoard extends Component {
           Object.keys(updatedKeysDown).forEach(
             k => (keysDown[k] = updatedKeysDown[k])
           );
-          {
-            /*console.log("onKeyDown: " + e.key + " keysDown: ", keysDown);*/
-          }
         }}
         onKeyUp={e => {
           keysDown[e.key] = false;
-          {
-            /*console.log("onKeyUp: " + e.key + " keysDown: ", keysDown);*/
-          }
         }}
       >
-        <Level />
+        <LevelOne />
+        <Floor />
       </div>
     );
   }
@@ -77,9 +85,9 @@ class GameBoard extends Component {
 
 const mapStateToProps = state => {
   return {
-    ...state //remove once working
+    initialized: state.initialReducer
   };
 };
 // const mapDispatchToProps = dispatch => {};
 
-export default connect(mapStateToProps /* ,mapDispatchToProps*/)(GameBoard);
+export default connect(/*mapStateToProps ,mapDispatchToProps*/)(GameBoard);

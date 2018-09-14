@@ -5,10 +5,15 @@ const MAX_SPD = 10;
 const initialState = {
   initialized: false,
   falling: false,
-  xPos: PLAYER_WIDTH,
+  playerWidth: 20,
+  playerHeight: 20,
+  ballColor: "hsla(0, 0%, 0%, 1)",
+  xPos: 20,
+  yPos: 857 - 20,
   xMin: 4,
   jmp: 40,
   spd: 0,
+  yMin: 857,
   lastXVector: null,
   xMotion: false,
   lastMovingVector: null
@@ -18,11 +23,12 @@ const initalReducer = (state = initialState, action) => {
   switch (action.type) {
     case "INIT_PLAYER": {
       const { xMax, yMin } = action.payload;
+      const { playerWidth, playerHeight } = state;
       return {
         ...state,
-        yPos: yMin - PLAYER_HEIGHT,
-        yMin: yMin - PLAYER_HEIGHT,
-        xMax: xMax - PLAYER_WIDTH,
+        yPos: yMin - playerHeight,
+        yMin: yMin - playerHeight,
+        xMax: xMax - playerWidth,
         initialized: true
       };
     }
@@ -112,7 +118,6 @@ const initalReducer = (state = initialState, action) => {
         yMin
       } = state;
 
-      console.log("xMotion: ", xMotion);
       return {
         ...state,
 
@@ -142,8 +147,18 @@ const initalReducer = (state = initialState, action) => {
       };
     }
 
+    case "CREATE_CHARACTER": {
+      const { ballColor, size } = action.payload;
+      console.log(action.payload);
+      return {
+        ...state,
+        ballColor: ballColor,
+        playerWidth: size,
+        playerHeight: size
+      };
+    }
+
     default: {
-      console.log("Unhandled Action ", action);
       return state;
     }
   }

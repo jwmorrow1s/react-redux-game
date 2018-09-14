@@ -2,30 +2,28 @@ import React, { Component } from "react";
 import "./App.css";
 import { connect } from "react-redux";
 import GameBoard from "./components/GameBoard/index";
+import StartScreen from "./components/Levels/LevelIndex/StartScreen";
+import CharacterCreation from "./components/Levels/LevelIndex/CharacterCreation";
+import { Switch, Route, BrowserRouter } from "react-router-dom";
 
 class App extends Component {
-  componentDidMount() {
-    const { initialized, dispatch } = this.props;
-    if (!initialized)
-      dispatch({
-        type: "INIT_PLAYER",
-        payload: {
-          xMax: document.body.getBoundingClientRect().width,
-          yMin: document.querySelector("#Floor").getBoundingClientRect().top
-        }
-      });
-  }
   render() {
     return (
-      <div id="App">
-        <GameBoard />
-      </div>
+      <BrowserRouter>
+        <div id="App">
+          <Switch>
+            <Route exact path="/" component={StartScreen} />
+            <Route exact path="/game" component={GameBoard} />
+            <Route exact path="/character" component={CharacterCreation} />
+          </Switch>
+        </div>
+      </BrowserRouter>
     );
   }
 }
 
 const mapStateToProps = state => {
-  const { initialized } = state;
+  const { initialized, yMin } = state.initialReducer;
   return { initialized };
 };
 // const mapDispatchToProps = dispatch => {};

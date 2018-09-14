@@ -4,25 +4,36 @@ import playerStyle from "./playerStyle";
 
 class Player extends Component {
   render() {
-    const { xPos, yPos } = this.props;
+    const { xPos, yPos, playerWidth, playerHeight, ballColor } = this.props;
     return (
       <div
         id="Player"
         style={{
           ...playerStyle,
           left: xPos + "px",
-          top: yPos + "px"
+          top: yPos + "px",
+          backgroundColor: ballColor,
+          color: ballColor,
+          width: playerWidth,
+          height: playerHeight
         }}
       >
-        x
+        <span style={{ opacity: "0" }}>.</span>
       </div>
     );
   }
 }
 
 const mapStateToProps = state => {
-  const { xPos, yPos } = state;
-  return { xPos, yPos };
+  // console.log(state.initialReducer);
+  const {
+    xPos,
+    yPos,
+    playerHeight,
+    playerWidth,
+    ballColor
+  } = state.initialReducer;
+  return { xPos, yPos, playerHeight, playerWidth, ballColor };
 };
 // const mapDispatchToProps = dispatch => {};
 
