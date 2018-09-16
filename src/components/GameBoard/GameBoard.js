@@ -15,6 +15,9 @@ class GameBoard extends Component {
       " ": false,
       ArrowDown: false
     };
+    this.state = {
+      gameTimeStarted: false
+    };
   }
 
   componentDidMount() {
@@ -24,12 +27,12 @@ class GameBoard extends Component {
     //Initialize Game, if not already
     const { initialized, dispatch } = this.props;
     if (!initialized) {
-      document.body.style.maxWidth = 800;
       dispatch({
         type: "INIT_PLAYER",
         payload: {
           xMax: document.body.getBoundingClientRect().width,
-          yMin: document.querySelector("#Floor").getBoundingClientRect().top
+          yMin: document.querySelector("#Floor").getBoundingClientRect().top,
+          timeStamp: new Date().getMilliseconds()
         }
       });
     }

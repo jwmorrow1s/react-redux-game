@@ -6,15 +6,16 @@ class Enemy extends Component {
   componentDidMount() {}
 
   render() {
-    const { enemies } = this.props;
+    const { enemies, iden } = this.props;
+    // console.log(this.props);
     return (
       <div
-        id="Enemy"
+        className="Enemy"
         style={{
           ...enemyStyle,
-          left: enemies[0].x + "px",
-          top: enemies[0].y + "px",
-          backgroundColor: enemies[0].color
+          left: enemies[iden].x + "px",
+          top: enemies[iden].y + "px",
+          backgroundColor: enemies[iden].color
         }}
       >
         <span style={{ opacity: "0" }}>.</span>

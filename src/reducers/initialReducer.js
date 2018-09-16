@@ -1,6 +1,6 @@
 const PLAYER_WIDTH = 20;
 const PLAYER_HEIGHT = 20;
-const MAX_SPD = 10;
+
 //TODO: set up upward velocity and replace jump with that
 const initialState = {
   initialized: false,
@@ -9,14 +9,30 @@ const initialState = {
   playerHeight: 20,
   ballColor: "hsla(0, 0%, 0%, 1)",
   xPos: 20,
-  yPos: 857 - 20,
+  yPos: 0,
   xMin: 4,
-  jmp: 40,
+  yAccel: -50,
+  MAX_SPD: 20,
   spd: 0,
   yMin: 0,
   lastXVector: null,
   xMotion: false,
-  lastMovingVector: null
+  lastMovingVector: null,
+  gameOver: false,
+  upgradeAccepted: false,
+
+  savedGame: {
+    xPos: null,
+    yPos: null,
+    yMin: null,
+    xMax: null,
+    xMin: null,
+    ballColor: null,
+    enemies: null
+  },
+  score: 0,
+  saveGamePresent: false,
+  scoreRight: true
 };
 
 const initalReducer = (state = initialState, action) => {
@@ -24,11 +40,7 @@ const initalReducer = (state = initialState, action) => {
     case "INIT_PLAYER": {
       const { xMax, yMin } = action.payload;
       const { playerWidth, playerHeight } = state;
-      console.log("yMin in enemyReducer: ", yMin);
-      console.log(
-        "In initialReducer: yMin - playerHeight: ",
-        yMin - playerHeight
-      );
+
       return {
         ...state,
         yPos: yMin - playerHeight,
@@ -40,7 +52,6 @@ const initalReducer = (state = initialState, action) => {
 
     case "MOVEMENT_UPDATE": {
       const {
-        jmp,
         spd,
         xMin,
         xMax,
@@ -50,13 +61,20 @@ const initalReducer = (state = initialState, action) => {
         falling,
         lastXVector,
         xMotion,
-        lastMovingVector
+        lastMovingVector,
+        gameOver,
+        yAccel,
+        MAX_SPD,
+        upgradeAccepted
       } = state;
-      const { keysDown } = action.payload;
 
+      //GAME OVER --- NO MOVEMENT POSSIBLE
+      if (gameOver || !upgradeAccepted) return state;
+
+      const { keysDown } = action.payload;
       const xVector = keysDown["ArrowLeft"] ? -1 : 1;
       const yVector = keysDown[" "] ? -1 : 1;
-      const runningJump = Math.pow(spd, 1.7) > jmp ? Math.pow(spd, 1.7) : jmp;
+
       const incomingXVector =
         Object.keys(keysDown).find(k => {
           return (
@@ -83,14 +101,9 @@ const initalReducer = (state = initialState, action) => {
             : xPos + spd <= xMax
               ? xPos + spd
               : xPos + (xMax - xPos),
-        // jmp: -40,
-        yPos: falling
-          ? yPos
-          : yVector < 0
-            ? yPos - runningJump
-            : yPos + jmp <= yMin
-              ? yPos + jmp
-              : yPos + (yMin - yPos),
+
+        yPos: falling ? yPos : yVector < 0 ? yPos + yAccel : yPos,
+
         spd: incomingXVector
           ? lastMovingVector
             ? incomingXVector === lastMovingVector
@@ -110,51 +123,63 @@ const initalReducer = (state = initialState, action) => {
 
     case "MOVEMENT_DECAY": {
       const {
-        jmp,
         spd,
         falling,
         xMotion,
         xPos,
         xMax,
-        lastXVector,
         xMin,
         lastMovingVector,
         yPos,
-        yMin
+        yMin,
+        gameOver,
+        score,
+        scoreRight
       } = state;
+
+      if (gameOver) return state;
+
+      const scored = scoreRight
+        ? Math.abs(xPos - xMax) <= 10
+          ? true
+          : false
+        : Math.abs(xPos - xMin) <= 10
+          ? true
+          : false;
 
       return {
         ...state,
 
-        xPos: falling
-          ? lastMovingVector === "ArrowLeft"
-            ? xPos - Math.pow(spd, 1.25) >= xMin
-              ? xPos - Math.pow(spd, 1.25)
-              : xPos - (xPos - xMin)
-            : lastMovingVector === "ArrowRight"
-              ? xPos + Math.pow(spd, 1.25) <= xMax
-                ? xPos + Math.pow(spd, 1.25)
-                : xPos + (xMax - xPos)
-              : xPos
-          : lastMovingVector === "ArrowLeft"
-            ? xPos - spd >= xMin
+        xPos: xMotion
+          ? xPos
+          : lastMovingVector === "ArrowRight"
+            ? xPos + spd <= xMax
+              ? xPos + spd
+              : xPos + (xMax - xPos)
+            : xPos - spd >= xMin
               ? xPos - spd
-              : xPos - (xPos - xMin)
-            : lastMovingVector === "ArrowRight"
-              ? xPos + spd <= xMax
-                ? xPos + spd
-                : xPos + (xMax - xPos)
-              : xPos,
+              : xPos - (xPos - xMin),
 
         yPos: falling ? (yPos * 1.008 <= yMin ? yPos * 1.008 : yMin) : yPos,
         spd: xMotion ? spd : spd - 1 >= 0 ? spd - 1 : spd,
-        falling: yPos < yMin ? true : false
+        falling: yPos < yMin ? true : false,
+        score: scored ? score + 100 : score,
+        scoreRight: scored ? !scoreRight : scoreRight
       };
+    }
+
+    case "POWER_UP_JUMP": {
+      console.log("power up jump");
+      return { ...state, upgradeAccepted: true, yAccel: -70 };
+    }
+
+    case "POWER_UP_SPEED": {
+      console.log("power up speed");
+      return { ...state, upgradeAccepted: true, MAX_SPD: 40 };
     }
 
     case "CREATE_CHARACTER": {
       const { ballColor, size } = action.payload;
-      console.log(action.payload);
       return {
         ...state,
         ballColor: ballColor,
@@ -163,8 +188,66 @@ const initalReducer = (state = initialState, action) => {
       };
     }
 
+    case "POINTS_SCORED": {
+      const { score } = state;
+      return { ...state, score: score + 100 };
+    }
+    case "GAME_SAVE": {
+      const {
+        xPos,
+        yPos,
+        xMax,
+        xMin,
+        yMin,
+        ballColor,
+        yAccel,
+        MAX_SPD,
+        score,
+        scoreRight
+      } = state;
+      const { enemies } = action.payload;
+      return {
+        ...state,
+        savedGame: {
+          xPos,
+          yPos,
+          xMax,
+          xMin,
+          yMin,
+          ballColor,
+          yAccel,
+          MAX_SPD,
+          enemies: { ...enemies },
+          score,
+          scoreRight
+        }
+      };
+    }
+
+    /*TODO*/
+    case "GAME_LOAD": {
+      const { savedGame } = state;
+      return {
+        ...state,
+        xPos: savedGame.xPos,
+        yPos: savedGame.yPos,
+        xMax: savedGame.xMax,
+        xMin: savedGame.xMin,
+        yMin: savedGame.yMin,
+        ballColor: savedGame.ballColor,
+        yAccel: savedGame.yAccel,
+        MAX_SPD: savedGame.MAX_SPD,
+        enemies: savedGame.enemies,
+        score: savedGame.score,
+        scoreRight: savedGame.scoreRight
+      };
+    }
+
+    case "COLLISION_DEATH": {
+      return { ...state, gameOver: true };
+    }
+
     default: {
-      console.log("UNHANDLED PLAYER ACTION: ", action.type);
       return state;
     }
   }

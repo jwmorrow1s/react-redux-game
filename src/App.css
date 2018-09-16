@@ -1,3 +1,5 @@
+/*Element and Component Styles*/
+
 body {
   font-family: times;
 }
@@ -15,9 +17,18 @@ body {
   outline: none;
 }
 
-#Enemy {
+.Enemy {
   margin: 0;
   padding: 0;
+}
+
+#PowerUp {
+  background-color: black;
+  color: white;
+  width: 200px;
+  height: 100px;
+  display: inline-block;
+  position: absolute;
 }
 
 #GameBoard:focus {
@@ -311,3 +322,46 @@ div.first-color {
   color: black;
   background-color: white;
 }
+
+/*POWERUP STYLES*/
+#power-up-container {
+  display: relative;
+  top: 10%;
+}
+
+#power-up-options-container {
+  display: flex;
+  align-self: center;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+/*SCORE styles*/
+#Score {
+  position: absolute;
+  top: 50px;
+  right: 44%;
+  height: 100px;
+  width: 200px;
+  border: 1px solid black;
+  color: white;
+  text-shadow: -2px 0 black, 0 2px black, 2px 0 black, 0 -2px black;
+}
+
+#score-container {
+  position: relative;
+}
+
+#score-heading {
+  position: absolute;
+  left: 32%;
+  top: 2px;
+  font-size: 30px;
+}
+
+#score-count {
+  font-size: 50px;
+  padding: 40px 70px;
+}
+
+/* SCOREITEM styles */
